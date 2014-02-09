@@ -1,4 +1,4 @@
-rxjava-util
-===========
+rx-java-util
+============
 
-Utilities for rx-java
+Utilities for use with rx-java
