@@ -14,6 +14,7 @@ import rx.subscriptions.Subscriptions;
 import rx.util.functions.Action0;
 import rx.util.functions.Action1;
 import rx.util.functions.Func1;
+import rx.util.functions.Functions;
 
 public class RxUtil {
 
@@ -101,4 +102,10 @@ public class RxUtil {
 		});
 	}
 
+	@SuppressWarnings("unchecked")
+	public static <T> Observable<T> concatButIgnoreFirstSequence(
+			Observable<?> o1, Observable<T> o2) {
+		return Observable.concat(
+				(Observable<T>) o1.filter(Functions.alwaysFalse()), o2);
+	}
 }
