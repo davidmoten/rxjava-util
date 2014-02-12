@@ -1,7 +1,8 @@
-package com.github.davidmoten.rx.util;
+package com.github.davidmoten.rx;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import rx.Notification;
@@ -15,6 +16,8 @@ import rx.util.functions.Action0;
 import rx.util.functions.Action1;
 import rx.util.functions.Func1;
 import rx.util.functions.Functions;
+
+import com.github.davidmoten.rx.operators.OperationShare;
 
 public class RxUtil {
 
@@ -108,4 +111,44 @@ public class RxUtil {
 		return Observable.concat(
 				(Observable<T>) o1.filter(Functions.alwaysFalse()), o2);
 	}
+
+	public static <T> Observable<T> share(final Observable<T> observable) {
+		return Observable.create(OperationShare.share(observable));
+	}
+
+	public static void main(String[] args) throws InterruptedException {
+		Observable<Long> interval = Observable.interval(1000,
+				TimeUnit.MILLISECONDS).map(new Func1<Long, Long>() {
+			@Override
+			public Long call(Long n) {
+				System.out.println("s=" + n);
+				return n;
+			}
+		});
+
+		Observable<Long> shared = share(interval);
+		Subscription sub1 = shared.subscribe(new Action1<Long>() {
+
+			@Override
+			public void call(Long n) {
+				System.out.println("1: " + n);
+			}
+		});
+		Thread.sleep(2000);
+		Subscription sub2 = shared.subscribe(new Action1<Long>() {
+
+			@Override
+			public void call(Long n) {
+				System.out.println("2: " + n);
+			}
+		});
+		Thread.sleep(5000);
+		sub2.unsubscribe();
+		Thread.sleep(5000);
+		sub1.unsubscribe();
+		Thread.sleep(3000);
+		Thread.sleep(3000);
+		System.out.println("finished");
+	}
+
 }

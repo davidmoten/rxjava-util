@@ -1,4 +1,4 @@
-package com.github.davidmoten.rx.util;
+package com.github.davidmoten.rx;
 
 import static rx.Observable.from;
 
@@ -7,6 +7,8 @@ import org.junit.Test;
 import rx.Observable;
 import rx.util.functions.Action0;
 import rx.util.functions.Action1;
+
+import com.github.davidmoten.rx.RxUtil;
 
 public class RxUtilTest {
 
