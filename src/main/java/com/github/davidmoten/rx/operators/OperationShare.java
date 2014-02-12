@@ -27,8 +27,7 @@ public class OperationShare {
 		}
 
 		@Override
-		public synchronized Subscription onSubscribe(
-				Observer<? super T> observer) {
+		public Subscription onSubscribe(Observer<? super T> observer) {
 			final Subscription sub = subject.subscribe(observer);
 			if (observersCount.incrementAndGet() == 1) {
 				mainSubscription.set(source.subscribe(subject));
@@ -38,11 +37,9 @@ public class OperationShare {
 				public void unsubscribe() {
 					System.out.println("unsubscribing");
 					sub.unsubscribe();
-					synchronized (this) {
-						if (observersCount.decrementAndGet() == 0) {
-							System.out.println("unsubscribing main");
-							mainSubscription.get().unsubscribe();
-						}
+					if (observersCount.decrementAndGet() == 0) {
+						System.out.println("unsubscribing main");
+						mainSubscription.get().unsubscribe();
 					}
 				}
 			};

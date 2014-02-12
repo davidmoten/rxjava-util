@@ -8,8 +8,6 @@ import rx.Observable;
 import rx.util.functions.Action0;
 import rx.util.functions.Action1;
 
-import com.github.davidmoten.rx.RxUtil;
-
 public class RxUtilTest {
 
 	@Test

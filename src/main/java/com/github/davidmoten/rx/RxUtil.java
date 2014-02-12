@@ -117,7 +117,7 @@ public class RxUtil {
 	}
 
 	public static void main(String[] args) throws InterruptedException {
-		Observable<Long> interval = Observable.interval(1000,
+		Observable<Long> interval = Observable.interval(100,
 				TimeUnit.MILLISECONDS).map(new Func1<Long, Long>() {
 			@Override
 			public Long call(Long n) {
@@ -134,7 +134,7 @@ public class RxUtil {
 				System.out.println("1: " + n);
 			}
 		});
-		Thread.sleep(2000);
+		Thread.sleep(200);
 		Subscription sub2 = shared.subscribe(new Action1<Long>() {
 
 			@Override
@@ -142,12 +142,12 @@ public class RxUtil {
 				System.out.println("2: " + n);
 			}
 		});
-		Thread.sleep(5000);
+		Thread.sleep(500);
 		sub2.unsubscribe();
-		Thread.sleep(5000);
+		Thread.sleep(500);
 		sub1.unsubscribe();
-		Thread.sleep(3000);
-		Thread.sleep(3000);
+		Thread.sleep(300);
+		Thread.sleep(300);
 		System.out.println("finished");
 	}
 
