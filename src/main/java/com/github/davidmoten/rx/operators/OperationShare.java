@@ -35,10 +35,8 @@ public class OperationShare {
 			return new Subscription() {
 				@Override
 				public void unsubscribe() {
-					System.out.println("unsubscribing");
 					sub.unsubscribe();
 					if (observersCount.decrementAndGet() == 0) {
-						System.out.println("unsubscribing main");
 						mainSubscription.get().unsubscribe();
 					}
 				}
