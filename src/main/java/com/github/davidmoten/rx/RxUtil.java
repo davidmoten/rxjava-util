@@ -2,7 +2,6 @@ package com.github.davidmoten.rx;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import rx.Notification;
@@ -17,6 +16,7 @@ import rx.util.functions.Action1;
 import rx.util.functions.Func1;
 import rx.util.functions.Functions;
 
+import com.github.davidmoten.rx.operators.OperationLog;
 import com.github.davidmoten.rx.operators.OperationShare;
 
 public class RxUtil {
@@ -112,43 +112,28 @@ public class RxUtil {
 				(Observable<T>) o1.filter(Functions.alwaysFalse()), o2);
 	}
 
-	public static <T> Observable<T> share(final Observable<T> observable) {
-		return Observable.create(OperationShare.share(observable));
+	/**
+	 * All subscribers to <code>share(source)</code> will be actually be
+	 * observers of a singleton subscription to the source. When all subscribers
+	 * to <code>share(source)</code> have unsubscribed the singleton
+	 * subscription is unsubscribed. You might use this method if the source
+	 * Observable is resource intensive and should only be run once at a time
+	 * with its emissions shared amongst many observers. An example is a high
+	 * rate infinite stream read from a server socket. One might want multiple
+	 * consumers to share the same stream rather than establishing their own
+	 * socket connections to the server socket.
+	 * 
+	 * @param source
+	 * @return <code>source</code> with modified subscription behaviour
+	 */
+	public static <T> Observable<T> share(final Observable<T> source) {
+		// TODO share does not seem to play nicely with
+		// Observable.retry().
+		return Observable.create(OperationShare.share(source));
 	}
 
-	public static void main(String[] args) throws InterruptedException {
-		Observable<Long> interval = Observable.interval(100,
-				TimeUnit.MILLISECONDS).map(new Func1<Long, Long>() {
-			@Override
-			public Long call(Long n) {
-				System.out.println("s=" + n);
-				return n;
-			}
-		});
-
-		Observable<Long> shared = share(interval);
-		Subscription sub1 = shared.subscribe(new Action1<Long>() {
-
-			@Override
-			public void call(Long n) {
-				System.out.println("1: " + n);
-			}
-		});
-		Thread.sleep(200);
-		Subscription sub2 = shared.subscribe(new Action1<Long>() {
-
-			@Override
-			public void call(Long n) {
-				System.out.println("2: " + n);
-			}
-		});
-		Thread.sleep(500);
-		sub2.unsubscribe();
-		Thread.sleep(500);
-		sub1.unsubscribe();
-		Thread.sleep(300);
-		Thread.sleep(300);
-		System.out.println("finished");
+	public static <T> Observable<T> log(final Observable<T> source) {
+		return Observable.create(OperationLog.log(source));
 	}
 
 }
