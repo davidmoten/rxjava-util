@@ -53,11 +53,11 @@ public class OperationShare {
 							// once main sub has been abandoned need to
 							// regenerate the source using a factory. This is
 							// because for example if the source uses
-							// CompositeSubscription then once completely
+							// CompositeSubscription (like OperatorRetry) then
+							// once completely
 							// unsubscribed every new subscription forces an
 							// unsubscribe action straight away thereby
-							// sabotaging the observable. Retry operator does
-							// this.
+							// sabotaging the observable.
 							mainSubscription.get().unsubscribe();
 							source.set(null);
 							subject.set(null);
