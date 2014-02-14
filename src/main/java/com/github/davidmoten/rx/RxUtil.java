@@ -13,6 +13,7 @@ import rx.observables.ConnectableObservable;
 import rx.subscriptions.Subscriptions;
 import rx.util.functions.Action0;
 import rx.util.functions.Action1;
+import rx.util.functions.Func0;
 import rx.util.functions.Func1;
 import rx.util.functions.Functions;
 
@@ -113,23 +114,31 @@ public class RxUtil {
 	}
 
 	/**
-	 * All subscribers to <code>share(source)</code> will be actually be
-	 * observers of a singleton subscription to the source. When all subscribers
-	 * to <code>share(source)</code> have unsubscribed the singleton
-	 * subscription is unsubscribed. You might use this method if the source
-	 * Observable is resource intensive and should only be run once at a time
-	 * with its emissions shared amongst many observers. An example is a high
-	 * rate infinite stream read from a server socket. One might want multiple
-	 * consumers to share the same stream rather than establishing their own
-	 * socket connections to the server socket.
+	 * <p>
+	 * When the first subscription occurs on the share (the result of this
+	 * method) for the first time the factory will be called to generate a new
+	 * source. All subscribers to the share will be observers of a singleton
+	 * subscription to the source (using PublishSubject). When all subscribers
+	 * to the share have unsubscribed the singleton subscription is unsubscribed
+	 * and the source is discarded. The share is at that point essentially
+	 * reset.
+	 * </p>
 	 * 
-	 * @param source
-	 * @return <code>source</code> with modified subscription behaviour
+	 * <p>
+	 * You might use this method if the source Observable is resource intensive
+	 * and should only be run once at a time with its emissions shared amongst
+	 * many observers. An example is a high rate infinite stream read from a
+	 * server socket. One might want multiple consumers to share the same stream
+	 * rather than establishing their own socket connections to the server
+	 * socket.
+	 * </p>
+	 * 
+	 * @param factory
+	 *            source factory
+	 * @return shared subscription to a source generated from the factory.
 	 */
-	public static <T> Observable<T> share(final Observable<T> source) {
-		// TODO share does not seem to play nicely with
-		// Observable.retry().
-		return Observable.create(OperationShare.share(source));
+	public static <T> Observable<T> share(Func0<Observable<T>> factory) {
+		return Observable.create(OperationShare.share(factory));
 	}
 
 	public static <T> Observable<T> log(final Observable<T> source) {
