@@ -120,7 +120,7 @@ public class OperationRetry {
 
 				@Override
 				public void onError(Throwable e) {
-					if (attempts.getAndIncrement() < maxRetries
+					if (attempts.incrementAndGet() <= maxRetries
 							|| maxRetries == INFINITE_RETRY) {
 						synchronized (lock) {
 							unsubscribeFromSource();
