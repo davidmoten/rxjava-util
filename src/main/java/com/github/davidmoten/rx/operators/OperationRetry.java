@@ -45,8 +45,8 @@ public class OperationRetry {
 	private static final int INFINITE_RETRY = -1;
 
 	public static <T> OnSubscribeFunc<T> retry(final Observable<T> observable,
-			final int retryCount) {
-		return new Retry<T>(observable, retryCount);
+			final int maxRetries) {
+		return new Retry<T>(observable, maxRetries);
 	}
 
 	public static <T> OnSubscribeFunc<T> retry(final Observable<T> observable) {
