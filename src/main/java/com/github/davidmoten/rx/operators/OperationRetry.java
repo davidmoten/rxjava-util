@@ -58,18 +58,14 @@ public class OperationRetry {
 		private final Observable<T> source;
 		private final int maxRetries;
 
-		public Retry(Observable<T> source, int maxRetries) {
+		Retry(Observable<T> source, int maxRetries) {
 			this.source = source;
 			this.maxRetries = maxRetries;
 		}
 
 		@Override
 		public Subscription onSubscribe(Observer<? super T> observer) {
-			final AtomicInteger attempts = new AtomicInteger(0);
-			final AtomicReference<Subscription> sourceSubscription = new AtomicReference<Subscription>(
-					Subscriptions.empty());
-			return new RetrySubscription<T>(source, observer,
-					sourceSubscription, attempts, maxRetries);
+			return new RetrySubscription<T>(source, observer, maxRetries);
 		}
 	}
 
@@ -83,12 +79,12 @@ public class OperationRetry {
 		private final Object lock = new Object();
 
 		RetrySubscription(Observable<T> source, Observer<? super T> observer,
-				AtomicReference<Subscription> sourceSubscription,
-				AtomicInteger attempts, int maxRetries) {
+				int maxRetries) {
 			this.source = source;
 			this.observer = observer;
-			this.sourceSubscription = sourceSubscription;
-			this.attempts = attempts;
+			this.sourceSubscription = new AtomicReference<Subscription>(
+					Subscriptions.empty());
+			this.attempts = new AtomicInteger(0);
 			this.maxRetries = maxRetries;
 			subscribeToSource();
 		}
@@ -135,5 +131,4 @@ public class OperationRetry {
 			};
 		}
 	}
-
 }
