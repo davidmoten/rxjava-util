@@ -6,10 +6,13 @@ import static rx.Observable.from;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
 
 import rx.Observable;
+import rx.Observable.OnSubscribeFunc;
+import rx.Observer;
 import rx.Subscription;
 import rx.subjects.PublishSubject;
 import rx.util.functions.Action0;
@@ -98,5 +101,31 @@ public class RxUtilTest {
 		assertEquals(5, set.size());
 
 		subject.onCompleted();
+	}
+
+	@Test
+	public void testRetryAllowsSubscriptionAfterAllSubscriptionsUnsubsribed() {
+		final AtomicInteger subsCount = new AtomicInteger(0);
+		OnSubscribeFunc<String> onSubscribe = new OnSubscribeFunc<String>() {
+			@Override
+			public Subscription onSubscribe(Observer<? super String> observer) {
+				subsCount.incrementAndGet();
+				return new Subscription() {
+
+					@Override
+					public void unsubscribe() {
+						subsCount.decrementAndGet();
+					}
+				};
+			}
+		};
+		Observable<String> stream = Observable.create(onSubscribe);
+		Observable<String> streamWithRetry = stream.retry();
+		Subscription sub = streamWithRetry.subscribe();
+		assertEquals(1, subsCount.get());
+		sub.unsubscribe();
+		assertEquals(0, subsCount.get());
+		streamWithRetry.subscribe();
+		assertEquals(1, subsCount.get());
 	}
 }
