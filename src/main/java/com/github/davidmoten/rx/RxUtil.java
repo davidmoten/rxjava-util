@@ -10,7 +10,6 @@ import rx.Observable.OnSubscribeFunc;
 import rx.Observer;
 import rx.Subscription;
 import rx.observables.ConnectableObservable;
-import rx.operators.OperationRetry;
 import rx.subscriptions.Subscriptions;
 import rx.util.functions.Action0;
 import rx.util.functions.Action1;
@@ -147,7 +146,9 @@ public class RxUtil {
 	}
 
 	public static <T> Observable<T> retry(final Observable<T> source) {
-		return Observable.create(OperationRetry.retry(source));
+		return Observable
+				.create(com.github.davidmoten.rx.operators.OperationRetry
+						.retry(source));
 	}
 
 }

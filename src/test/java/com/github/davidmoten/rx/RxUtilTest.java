@@ -120,7 +120,7 @@ public class RxUtilTest {
 			}
 		};
 		Observable<String> stream = Observable.create(onSubscribe);
-		Observable<String> streamWithRetry = stream.retry();
+		Observable<String> streamWithRetry = RxUtil.retry(stream);
 		Subscription sub = streamWithRetry.subscribe();
 		assertEquals(1, subsCount.get());
 		sub.unsubscribe();

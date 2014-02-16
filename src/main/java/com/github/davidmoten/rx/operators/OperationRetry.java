@@ -31,6 +31,7 @@ package com.github.davidmoten.rx.operators;
  * limitations under the License.
  */
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -38,7 +39,6 @@ import rx.Observable;
 import rx.Observable.OnSubscribeFunc;
 import rx.Observer;
 import rx.Subscription;
-import rx.subscriptions.Subscriptions;
 
 public class OperationRetry {
 
@@ -75,6 +75,7 @@ public class OperationRetry {
 		private final Observer<? super T> observer;
 		private final AtomicReference<Subscription> sourceSubscription;
 		private final AtomicInteger attempts;
+		private final AtomicBoolean subscribed;
 		private final int maxRetries;
 		private final Object lock = new Object();
 
@@ -82,19 +83,24 @@ public class OperationRetry {
 				int maxRetries) {
 			this.source = source;
 			this.observer = observer;
-			this.sourceSubscription = new AtomicReference<Subscription>(
-					Subscriptions.empty());
 			this.attempts = new AtomicInteger(0);
 			this.maxRetries = maxRetries;
-			subscribeToSource();
+			this.sourceSubscription = new AtomicReference<Subscription>(
+					source.subscribe(createObserver()));
+			this.subscribed = new AtomicBoolean(true);
 		}
 
 		private void subscribeToSource() {
 			sourceSubscription.set(source.subscribe(createObserver()));
+			subscribed.set(true);
 		}
 
 		private void unsubscribeFromSource() {
-			sourceSubscription.get().unsubscribe();
+			// only unsubscribe once
+			if (subscribed.get()) {
+				sourceSubscription.get().unsubscribe();
+				subscribed.set(false);
+			}
 		}
 
 		@Override
