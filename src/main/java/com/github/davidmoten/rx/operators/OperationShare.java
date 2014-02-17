@@ -13,10 +13,43 @@ import rx.util.functions.Func0;
 public class OperationShare {
 
 	public static <T> OnSubscribeFunc<T> share(Func0<Observable<T>> factory) {
-		return new Share<T>(factory);
+		return new ShareFactory<T>(factory);
+	}
+
+	public static <T> OnSubscribeFunc<T> share(Observable<T> source) {
+		return new Share<T>(source);
 	}
 
 	private static class Share<T> implements OnSubscribeFunc<T> {
+
+		private final Observable<? extends T> source;
+		private final PublishSubject<T> subject = PublishSubject.create();
+		private final AtomicInteger observersCount = new AtomicInteger(0);
+		private final AtomicReference<Subscription> mainSubscription = new AtomicReference<Subscription>();
+
+		Share(Observable<? extends T> source) {
+			this.source = source;
+		}
+
+		@Override
+		public Subscription onSubscribe(Observer<? super T> observer) {
+			final Subscription sub = subject.subscribe(observer);
+			if (observersCount.incrementAndGet() == 1) {
+				mainSubscription.set(source.subscribe(subject));
+			}
+			return new Subscription() {
+				@Override
+				public void unsubscribe() {
+					sub.unsubscribe();
+					if (observersCount.decrementAndGet() == 0) {
+						mainSubscription.get().unsubscribe();
+					}
+				}
+			};
+		}
+	}
+
+	private static class ShareFactory<T> implements OnSubscribeFunc<T> {
 
 		private final Func0<Observable<T>> factory;
 		private final AtomicReference<Observable<T>> source;
@@ -26,7 +59,7 @@ public class OperationShare {
 		private final AtomicInteger observersCount = new AtomicInteger(0);
 		private final AtomicReference<Subscription> mainSubscription = new AtomicReference<Subscription>();
 
-		Share(Func0<Observable<T>> factory) {
+		ShareFactory(Func0<Observable<T>> factory) {
 			this.factory = factory;
 			this.source = new AtomicReference<Observable<T>>(null);
 		}

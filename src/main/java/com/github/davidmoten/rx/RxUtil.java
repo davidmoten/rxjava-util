@@ -141,6 +141,10 @@ public class RxUtil {
 		return Observable.create(OperationShare.share(factory));
 	}
 
+	public static <T> Observable<T> share(Observable<T> source) {
+		return Observable.create(OperationShare.share(source));
+	}
+
 	public static <T> Observable<T> log(final Observable<T> source) {
 		return Observable.create(OperationLog.log(source));
 	}
