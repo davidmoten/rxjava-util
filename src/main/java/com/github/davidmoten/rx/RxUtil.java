@@ -18,7 +18,6 @@ import rx.util.functions.Func1;
 import rx.util.functions.Functions;
 
 import com.github.davidmoten.rx.operators.OperationLog;
-import com.github.davidmoten.rx.operators.OperationShare;
 import com.github.davidmoten.rx.operators.OperationShareWithFactory;
 
 public class RxUtil {
@@ -114,6 +113,16 @@ public class RxUtil {
 				(Observable<T>) o1.filter(Functions.alwaysFalse()), o2);
 	}
 
+	public static <T> Func0<T> constant(final T t) {
+		return new Func0<T>() {
+
+			@Override
+			public T call() {
+				return t;
+			}
+		};
+	}
+
 	/**
 	 * <p>
 	 * All subscribers to the share will be observers of a singleton
@@ -137,7 +146,8 @@ public class RxUtil {
 	 * @return shared subscription to the source.
 	 */
 	public static <T> Observable<T> share(Observable<T> source) {
-		return Observable.create(OperationShare.share(source));
+		return Observable.create(OperationShareWithFactory
+				.share(constant(source)));
 	}
 
 	/**
