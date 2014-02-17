@@ -17,7 +17,6 @@ import rx.Subscription;
 import rx.subjects.PublishSubject;
 import rx.util.functions.Action0;
 import rx.util.functions.Action1;
-import rx.util.functions.Func0;
 
 public class RxUtilTest {
 
@@ -53,15 +52,7 @@ public class RxUtilTest {
 	@Test
 	public void testShare() {
 		final PublishSubject<Integer> subject = PublishSubject.create();
-		Observable<Integer> shared = RxUtil
-				.share(new Func0<Observable<Integer>>() {
-
-					@Override
-					public Observable<Integer> call() {
-						return subject;
-					}
-
-				});
+		Observable<Integer> shared = RxUtil.share(subject);
 		final Set<String> set = new HashSet<String>();
 		Subscription sub1 = shared.subscribe(new Action1<Integer>() {
 			@Override
@@ -127,5 +118,9 @@ public class RxUtilTest {
 		assertEquals(0, subsCount.get());
 		streamWithRetry.subscribe();
 		assertEquals(1, subsCount.get());
+	}
+
+	@Test
+	public void testPublishConnect() {
 	}
 }

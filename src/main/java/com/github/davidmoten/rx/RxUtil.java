@@ -13,7 +13,6 @@ import rx.observables.ConnectableObservable;
 import rx.subscriptions.Subscriptions;
 import rx.util.functions.Action0;
 import rx.util.functions.Action1;
-import rx.util.functions.Func0;
 import rx.util.functions.Func1;
 import rx.util.functions.Functions;
 
@@ -115,20 +114,18 @@ public class RxUtil {
 
 	/**
 	 * <p>
-	 * When the first subscription occurs on the share (the result of this
-	 * method) for the first time the factory will be called to generate a new
-	 * source. All subscribers to the share will be observers of a singleton
+	 * All subscribers to the share will be observers of a singleton
 	 * subscription to the source (using PublishSubject). When all subscribers
-	 * to the share have unsubscribed the singleton subscription is unsubscribed
-	 * and the source is discarded. The share is at that point essentially
-	 * reset.
+	 * to the share have unsubscribed the singleton subscription is
+	 * unsubscribed. The share is at that point essentially reset.
 	 * </p>
 	 * 
 	 * <p>
 	 * You might use this method if the source Observable is resource intensive
 	 * and should only be run once at a time with its emissions shared amongst
 	 * many observers. An example is a high rate infinite stream read from a
-	 * server socket. One might want multiple consumers to share the same stream
+	 * server socket. The connection to that stream might be constrained in
+	 * bandwidth so one would want multiple consumers to share the same stream
 	 * rather than establishing their own socket connections to the server
 	 * socket.
 	 * </p>
@@ -137,10 +134,6 @@ public class RxUtil {
 	 *            source factory
 	 * @return shared subscription to a source generated from the factory.
 	 */
-	public static <T> Observable<T> share(Func0<Observable<T>> factory) {
-		return Observable.create(OperationShare.share(factory));
-	}
-
 	public static <T> Observable<T> share(Observable<T> source) {
 		return Observable.create(OperationShare.share(source));
 	}
