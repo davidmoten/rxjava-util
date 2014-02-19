@@ -7,7 +7,9 @@ import rx.Observable;
 import rx.Observable.OnSubscribeFunc;
 import rx.Observer;
 import rx.Subscription;
+import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
+import rx.util.functions.Action0;
 
 public class OperationShare {
 
@@ -36,9 +38,14 @@ public class OperationShare {
 				@Override
 				public void unsubscribe() {
 					sub.unsubscribe();
-					if (observersCount.decrementAndGet() == 0) {
-						mainSubscription.get().unsubscribe();
-					}
+					Schedulers.currentThread().schedule(new Action0() {
+						@Override
+						public void call() {
+							if (observersCount.decrementAndGet() == 0) {
+								mainSubscription.get().unsubscribe();
+							}
+						}
+					});
 				}
 			};
 		}
