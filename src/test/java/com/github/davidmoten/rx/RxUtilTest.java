@@ -1,5 +1,6 @@
 package com.github.davidmoten.rx;
 
+import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static rx.Observable.from;
@@ -19,7 +20,7 @@ public class RxUtilTest {
 
 	@Test
 	public void testDoWhenAllComplete2() {
-		Observable<Integer> o = from(1, 2, 3);
+		Observable<Integer> o = from(asList(1, 2, 3));
 		RxUtil.print(o);
 		Observable<Observable<Integer>> o2 = from(from(1, 2, 3),
 				from(4, 5, 6, 7, 8, 9));
