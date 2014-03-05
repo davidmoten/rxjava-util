@@ -6,38 +6,22 @@ import static rx.Observable.from;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
 
 import rx.Observable;
-import rx.Observable.OnSubscribeFunc;
-import rx.Observer;
 import rx.Subscription;
+import rx.functions.Action0;
+import rx.functions.Action1;
 import rx.subjects.PublishSubject;
-import rx.util.functions.Action0;
-import rx.util.functions.Action1;
 
 public class RxUtilTest {
-
-	@Test
-	public void testCount() {
-		Observable<Integer> c = Observable.range(1, 100);
-		Observable<Integer> c2 = RxUtil.count(c, new Action1<Long>() {
-			@Override
-			public void call(Long count) {
-				System.out.println("finished counting " + count);
-			}
-		});
-		long count = c2.count().toBlockingObservable().single();
-		System.out.println("count=" + count);
-	}
 
 	@Test
 	public void testDoWhenAllComplete2() {
 		Observable<Integer> o = from(1, 2, 3);
 		RxUtil.print(o);
-		Observable<Observable<Integer>> o2 = Observable.from(from(1, 2, 3),
+		Observable<Observable<Integer>> o2 = from(from(1, 2, 3),
 				from(4, 5, 6, 7, 8, 9));
 		Observable<Observable<Integer>> o3 = RxUtil.doWhenAllComplete(o2,
 				new Action0() {
@@ -94,33 +78,4 @@ public class RxUtilTest {
 		subject.onCompleted();
 	}
 
-	@Test
-	public void testRetryAllowsSubscriptionAfterAllSubscriptionsUnsubsribed() {
-		final AtomicInteger subsCount = new AtomicInteger(0);
-		OnSubscribeFunc<String> onSubscribe = new OnSubscribeFunc<String>() {
-			@Override
-			public Subscription onSubscribe(Observer<? super String> observer) {
-				subsCount.incrementAndGet();
-				return new Subscription() {
-
-					@Override
-					public void unsubscribe() {
-						subsCount.decrementAndGet();
-					}
-				};
-			}
-		};
-		Observable<String> stream = Observable.create(onSubscribe);
-		Observable<String> streamWithRetry = RxUtil.retry(stream);
-		Subscription sub = streamWithRetry.subscribe();
-		assertEquals(1, subsCount.get());
-		sub.unsubscribe();
-		assertEquals(0, subsCount.get());
-		streamWithRetry.subscribe();
-		assertEquals(1, subsCount.get());
-	}
-
-	@Test
-	public void testPublishConnect() {
-	}
 }
