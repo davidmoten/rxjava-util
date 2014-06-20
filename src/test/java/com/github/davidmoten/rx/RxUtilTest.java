@@ -7,6 +7,7 @@ import static rx.Observable.from;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
@@ -14,6 +15,7 @@ import rx.Observable;
 import rx.Subscription;
 import rx.functions.Action0;
 import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 
 public class RxUtilTest {
@@ -22,8 +24,8 @@ public class RxUtilTest {
 	public void testDoWhenAllComplete2() {
 		Observable<Integer> o = from(asList(1, 2, 3));
 		RxUtil.print(o);
-		Observable<Observable<Integer>> o2 = from(from(1, 2, 3),
-				from(4, 5, 6, 7, 8, 9));
+		Observable<Observable<Integer>> o2 = from(asList(from(asList(1, 2, 3)),
+				from(asList(4, 5, 6, 7, 8, 9))));
 		Observable<Observable<Integer>> o3 = RxUtil.doWhenAllComplete(o2,
 				new Action0() {
 					@Override
@@ -79,4 +81,48 @@ public class RxUtilTest {
 		subject.onCompleted();
 	}
 
+	// @Test
+	public void test() throws InterruptedException {
+		Action1<Long> work = new Action1<Long>() {
+
+			@Override
+			public void call(Long n) {
+				try {
+					System.out.println("starting " + n);
+					Thread.sleep(10000);
+					System.out.println("finished " + n);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+
+		};
+		PublishSubject<Long> subject = PublishSubject.create();
+		Observable
+				.merge(subject, Observable.just(-1L),
+						Observable.interval(30000, TimeUnit.MILLISECONDS))
+				.doOnNext(work).subscribe();
+		Thread.sleep(1000);
+		subject.onNext(-2L);
+		subject.onNext(-3L);
+		Thread.sleep(10000);
+
+	}
+
+	@Test
+	public void test2() throws InterruptedException {
+		Observable.range(1, 1000).observeOn(Schedulers.newThread()).take(500)
+				.doOnNext(new Action1<Integer>() {
+
+					@Override
+					public void call(Integer n) {
+						try {
+							Thread.sleep(20000);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+				}).subscribe();
+		Thread.sleep(300000);
+	}
 }

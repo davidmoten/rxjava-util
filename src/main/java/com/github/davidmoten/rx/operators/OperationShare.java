@@ -9,6 +9,7 @@ import rx.Observable.Operator;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.subjects.PublishSubject;
+import rx.subscriptions.CompositeSubscription;
 import rx.subscriptions.Subscriptions;
 
 public class OperationShare {
@@ -72,6 +73,7 @@ public class OperationShare {
 
 		@Override
 		public Subscriber<? super T> call(final Subscriber<? super T> subscriber) {
+			CompositeSubscription parent = new CompositeSubscription();
 			subject.subscribe(subscriber);
 			synchronized (lock) {
 				if (observersCount.incrementAndGet() == 1) {
@@ -98,6 +100,5 @@ public class OperationShare {
 			subscriber.add(result);
 			return result;
 		}
-
 	}
 }
