@@ -1,4 +1,4 @@
 rxjava-util
 ============
 
-Utilities for use with rx-java
+Muck around project with RxJava.
