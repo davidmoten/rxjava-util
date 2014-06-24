@@ -6,25 +6,23 @@ import rx.Subscriber;
 public class OperatorIdentity<T> implements Operator<T, T> {
 
 	@Override
-	public Subscriber<? super T> call(Subscriber<? super T> child) {
+	public Subscriber<? super T> call(final Subscriber<? super T> child) {
+		// return a facade around child
 		return new Subscriber<T>(child) {
 
 			@Override
 			public void onCompleted() {
-				// TODO Auto-generated method stub
-
+				child.onCompleted();
 			}
 
 			@Override
-			public void onError(Throwable arg0) {
-				// TODO Auto-generated method stub
-
+			public void onError(Throwable e) {
+				child.onError(e);
 			}
 
 			@Override
-			public void onNext(T arg0) {
-				// TODO Auto-generated method stub
-
+			public void onNext(T t) {
+				child.onNext(t);
 			}
 		};
 
