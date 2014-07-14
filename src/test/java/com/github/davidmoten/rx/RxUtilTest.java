@@ -5,6 +5,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static rx.Observable.from;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -15,6 +19,8 @@ import rx.Observable;
 import rx.Subscription;
 import rx.functions.Action0;
 import rx.functions.Action1;
+import rx.functions.Func0;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 
@@ -125,4 +131,25 @@ public class RxUtilTest {
 				}).subscribe();
 		Thread.sleep(300000);
 	}
+
+	@Test
+	public void testUsing() {
+		Func0<InputStream> resourceFactory = () -> {
+			try {
+				return new FileInputStream("target");
+			} catch (FileNotFoundException e) {
+				throw new RuntimeException(e);
+			}
+		};
+		Func1<InputStream, Observable<String>> observableFactory = is -> Observable
+				.just("boo");
+		Action1<InputStream> onTerminate = is -> {try {
+			is.close();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}};
+		RxUtil.using(resourceFactory, observableFactory, onTerminate);
+	}
+	
+	
 }

@@ -5,8 +5,10 @@ import java.io.OutputStream;
 
 import rx.Notification;
 import rx.Observable;
+import rx.Observable.OnSubscribe;
 import rx.Observable.OnSubscribeFunc;
 import rx.Observer;
+import rx.Subscriber;
 import rx.Subscription;
 import rx.functions.Action0;
 import rx.functions.Action1;
@@ -14,6 +16,7 @@ import rx.functions.Func0;
 import rx.functions.Func1;
 import rx.functions.Functions;
 import rx.observables.ConnectableObservable;
+import rx.observers.Subscribers;
 import rx.subscriptions.Subscriptions;
 
 import com.github.davidmoten.rx.operators.OperationShare;
@@ -35,6 +38,33 @@ public class RxUtil {
 				return Subscriptions.from(sub1, sub2, sub3);
 			}
 		});
+	}
+	
+	public static <S,T> Observable<T> using(final Func0<S> resourceFactory,final Func1<S,Observable<T>> observableFactory, final Action1<S> onTerminate){
+		return Observable.create(new OnSubscribe<T>() {
+
+			@Override
+			public void call(Subscriber<? super T> subscriber) {
+				S resource = null;
+		        try {
+		            resource = resourceFactory.call();
+		            final S res = resource;
+		            subscriber.add(Subscriptions.create(new Action0() {
+						@Override
+						public void call() {
+							onTerminate.call(res);
+						}}));
+		            Observable<? extends T> observable = observableFactory.call(resource);
+		            observable.subscribe(subscriber);
+		        } catch (Throwable e) {
+		            if (resource != null) {
+		                onTerminate.call(resource);
+		            }
+		            subscriber.onError(e);
+		        }				
+			}
+		});
+		
 	}
 
 	public static <T> Func1<T, T> println(final OutputStream out) {
