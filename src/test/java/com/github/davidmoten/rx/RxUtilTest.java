@@ -40,23 +40,6 @@ public class RxUtilTest {
 
     }
 
-    @Test
-    public void test2() throws InterruptedException {
-        Observable.range(1, 1000).observeOn(Schedulers.newThread()).take(500)
-                .doOnNext(new Action1<Integer>() {
-
-                    @Override
-                    public void call(Integer n) {
-                        try {
-                            Thread.sleep(20000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }).subscribe();
-        Thread.sleep(300000);
-    }
-
     
 
 }
